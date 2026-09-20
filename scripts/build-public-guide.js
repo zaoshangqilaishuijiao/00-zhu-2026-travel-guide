@@ -18,7 +18,15 @@ function buildPublicGuide(source, env = process.env) {
   }
   let output = source;
   output = replaceRequired(output, PUBLIC_PLACEHOLDERS.googleKey, env.GOOGLE_MAPS_BROWSER_KEY, "GOOGLE_MAPS_BROWSER_KEY");
-  output = replaceRequired(output, PUBLIC_PLACEHOLDERS.baiduAk, env.BAIDU_MAP_BROWSER_AK, "BAIDU_MAP_BROWSER_AK");
+  // A rendered guide always carries both map config objects so its client runtime can
+  // remain template-compatible. Only require the provider selected by this guide:
+  // overseas guides use Google Maps and do not need a Baidu browser key at build time.
+  const usesBaiduMaps = /const\s+mapProvider\s*=\s*["']baidu["']/.test(source);
+  if (usesBaiduMaps) {
+    output = replaceRequired(output, PUBLIC_PLACEHOLDERS.baiduAk, env.BAIDU_MAP_BROWSER_AK, "BAIDU_MAP_BROWSER_AK");
+  } else {
+    output = output.split(PUBLIC_PLACEHOLDERS.baiduAk).join("");
+  }
   if (output.includes(PUBLIC_PLACEHOLDERS.supabaseProjectUrl) || output.includes(PUBLIC_PLACEHOLDERS.supabasePublishableKey)) {
     const projectUrl = String(env.SUPABASE_PROJECT_URL || "").trim().replace(/\/+$/, "");
     const match = projectUrl.match(/^https:\/\/([a-z0-9-]+)\.supabase\.co$/i);
