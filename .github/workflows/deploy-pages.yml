@@ -30,7 +30,9 @@ jobs:
           GOOGLE_MAPS_BROWSER_KEY: ${{ secrets.GOOGLE_MAPS_BROWSER_KEY }}
           SUPABASE_PROJECT_URL: ${{ secrets.SUPABASE_PROJECT_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-        run: node scripts/build-public-guide.js guide.source.html public/index.html
+        run: |
+          node scripts/build-public-guide.js guide.source.html public/index.html
+          cp -R images public/images
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
